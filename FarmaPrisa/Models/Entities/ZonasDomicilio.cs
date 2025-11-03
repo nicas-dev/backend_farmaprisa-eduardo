@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace FarmaPrisa.Models.Entities;
+
+/// <summary>
+/// Tabla para gestión de las zonas de domicilio
+/// </summary>
+public partial class ZonasDomicilio
+{
+    public int Id { get; set; }
+
+    public string Nombre { get; set; } = null!;
+
+    public string? Descripcion { get; set; }
+
+    public decimal CostoEnvio { get; set; }
+
+    public int SucursalId { get; set; }
+
+    public bool? EstaActiva { get; set; }
+
+    public virtual ICollection<HorariosDomicilio> HorariosDomicilios { get; set; } = new List<HorariosDomicilio>();
+
+    public virtual Sucursale Sucursal { get; set; } = null!;
+}

@@ -1,0 +1,4388 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "FarmaPrisa",
+    "version": "1.0"
+  },
+  "paths": {
+    "/admin/usuarios": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Devuelve el listado completo de todos los usuarios registrados (activos e inactivos). Solo Administradores.",
+        "description": "Este endpoint ignora cualquier filtro global de seguridad para permitir la gestión completa.\r\nDevuelve los roles de cada usuario.",
+        "responses": {
+          "200": {
+            "description": "Listado de todos los usuarios (incluye estado e información de roles).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioAdminDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioAdminDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioAdminDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (falta token).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado (el usuario no tiene el rol 'administrador').",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Crea un nuevo usuario y le asigna roles específicos (ej: Entregador o Cajero). Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint permite registrar empleados o administradores directamente.",
+        "requestBody": {
+          "description": "Datos del nuevo usuario y lista de Roles a asignar (por nombre).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioAdminCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioAdminCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioAdminCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado y roles asignados exitosamente. Devuelve el ID del nuevo usuario.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. Correo ya existe).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno (ej. Rol no encontrado o fallo en la BD)."
+          }
+        }
+      }
+    },
+    "/admin/usuarios/{id}/toggle-status": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Alterna (Bloquea/Desbloquea) el acceso de un usuario al sistema. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint invierte el estado actual de 'EstaActivo'.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del usuario a modificar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alternancia de estado exitosa. Devuelve un ApiResultDto.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/pedidos": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Muestra la lista de todos los pedidos registrados en el sistema con un resumen de su estado. Solo Administradores.",
+        "description": "Este endpoint es utilizado por el dashboard para la gestión de órdenes.\r\nIncluye el nombre del cliente, el estado, el tipo de entrega y el total.",
+        "responses": {
+          "200": {
+            "description": "Listado de Pedidos con información resumida.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PedidoAdminDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PedidoAdminDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PedidoAdminDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado (el usuario no tiene el rol 'administrador').",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/pedidos/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Muestra el detalle completo de un pedido específico, incluyendo artículos, costos, cliente y estado de pago. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este es el endpoint utilizado por la vista de detalle de la orden.\r\nCarga datos complejos como detalles_pedido, cliente, dirección y transacciones.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del pedido a consultar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve el objeto PedidoDetalleDto completo.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDetalleDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDetalleDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDetalleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pedido no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/importar": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Carga masiva de productos desde un archivo CSV o Excel. Solo Administradores.",
+        "description": "Este endpoint lee el archivo, valida los datos, resuelve los identificadores de Categoría/Proveedor y realiza la inserción transaccional.\r\nSe utiliza un archivo de plantilla estricta.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "El archivo CSV o Excel a importar.",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada. Devuelve un resumen de filas exitosas y fallidas.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Archivos no válidos o errores de formato.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/galeria": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Sube múltiples imágenes para la galería de un producto existente. Solo Administradores.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto al que se añadirán las imágenes.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "archivos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Colección de archivos (IFormFile) a subir."
+                  }
+                }
+              },
+              "encoding": {
+                "archivos": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/roles": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Devuelve el catálogo completo de roles disponibles en el sistema (ej: administrador, entregador, cliente). Solo Administradores.",
+        "description": "Este endpoint se usa para poblar listas de selección en el panel de administración al asignar roles a un usuario.\r\nRequiere el rol 'administrador'.",
+        "responses": {
+          "200": {
+            "description": "Listado de roles (Id y Nombre).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RolDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RolDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RolDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/usuarios/{id}/roles": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Sincroniza la lista completa de roles asignados a un usuario. Solo Administradores.",
+        "description": "Este endpoint requiere la lista *completa* de IDs de roles que el usuario debe tener. \r\nLos roles existentes que no estén en la lista enviada serán eliminados.\r\nRequiere el rol 'administrador'.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del usuario cuyos roles serán actualizados.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Objeto con la lista de IDs de roles que el usuario debe tener.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRolesUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRolesUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRolesUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sincronización de roles exitosa."
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej: RolId inexistente).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/archivos/upload": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Sube un archivo de imagen al servidor (VPS) y devuelve su URL pública. Uso general del Panel Admin.",
+        "description": "Este endpoint se usa para subir logos, banners de proveedores, imágenes de perfil, etc., antes de crear o actualizar entidades.\r\nRequiere el rol 'administrador'.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "El archivo de imagen a subir (IFormFile).",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Archivo subido con éxito. Devuelve la URL pública.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Archivo no válido o faltante.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Devuelve todos los datos estadísticos y de gestión necesarios para el Dashboard del Administrador.",
+        "description": "Requiere el rol 'administrador'. Consolida KPIs, gráficos de ventas y alertas de inventario.",
+        "responses": {
+          "200": {
+            "description": "Objeto DashboardDataDto con todos los indicadores.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDataDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDataDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDataDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/inventario": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Devuelve el listado completo del inventario con paginación para la gestión de stock. Solo Administradores.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página a recuperar (por defecto 1).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Número de elementos por página (por defecto 25).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos paginados del inventario.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoVencimientoDtoPagedResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoVencimientoDtoPagedResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoVencimientoDtoPagedResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/opiniones": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Devuelve el listado completo de todas las opiniones de productos para moderación y gestión. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint se usa para el panel de moderación.",
+        "responses": {
+          "200": {
+            "description": "Listado de todas las opiniones.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Crea una nueva cuenta de cliente en la plataforma.",
+        "description": "Este endpoint recibe los datos del nuevo usuario, verifica que el correo no esté en uso,\r\nhashea la contraseña de forma segura y finalmente almacena el registro en la base de datos.\r\nAl registrarse, al usuario se le asigna automáticamente el rol de 'Cliente'.",
+        "requestBody": {
+          "description": "Objeto que contiene la información del usuario: NombreCompleto, Email, Password y PaisId.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registro exitoso. Devuelve un mensaje de confirmación.",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Error en la solicitud. Ocurre si el correo ya está registrado o los datos son inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor. Ocurre si el rol 'Cliente' no se encuentra en la base de datos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Inicia sesión para un usuario existente y genera un token de acceso.",
+        "description": "Este endpoint valida las credenciales del usuario (email y contraseña).\r\nUtiliza BCrypt para comparar de forma segura la contraseña proporcionada con el hash almacenado.\r\nSi la autenticación es exitosa, devuelve un token JWT que debe ser utilizado en la cabecera 'Authorization'\r\nde las siguientes peticiones a endpoints protegidos (Ej: 'Bearer {token}').",
+        "requestBody": {
+          "description": "Objeto que contiene el Email y la Contraseña del usuario.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticación exitosa. Devuelve un objeto que contiene el token JWT.",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales incorrectas. Ocurre si el email no existe o la contraseña es errónea.",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Categorias": {
+      "post": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Crea una nueva categoría o subcategoría en el catálogo. Solo accesible para Administradores.",
+        "description": "Utiliza 'CategoriaPadreId' para crear una subcategoría vinculada a una categoría principal existente.\r\nRequiere el rol 'administrador'.",
+        "requestBody": {
+          "description": "Datos de la nueva categoría (Nombre, Descripción, CategoriaPadreId opcional).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoría creada exitosamente. Devuelve el ID de la nueva categoría.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Obtiene el catálogo completo de categorías con su estructura jerárquica (padre/hijo).",
+        "description": "Este endpoint es utilizado por el panel de administración para mostrar el árbol de navegación.\r\nNo está protegido, ya que el catálogo de categorías es público.",
+        "responses": {
+          "200": {
+            "description": "Devuelve un listado de categorías raíz con sus subcategorías anidadas.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Categorias/{id}": {
+      "put": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Actualiza el nombre, descripción y/o jerarquía de una categoría existente. Solo Administradores.",
+        "description": "Este endpoint permite renombrar o mover una categoría a otra categoría padre.\r\nRequiere el rol 'administrador'.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la categoría a actualizar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Datos de la categoría a actualizar (se actualiza solo lo que se envía).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoriaCreateUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Actualización exitosa."
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. ID de padre inexistente).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoría no encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Geografia/paises": {
+      "get": {
+        "tags": [
+          "Geografia"
+        ],
+        "summary": "Recupera la lista de países disponibles en la plataforma.",
+        "description": "Este endpoint consulta la tabla 'divisiones_geograficas' para obtener los registros de tipo 'País'.\r\nSe utiliza principalmente para poblar los selectores en los formularios de registro de usuarios y direcciones.\r\nDevuelve una lista simplificada (DTO) con el Id y el Nombre de cada país.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa. Devuelve un array con los países, cada uno con su Id y Nombre.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaisDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaisDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaisDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HealthCheck/db-connection": {
+      "get": {
+        "tags": [
+          "HealthCheck"
+        ],
+        "summary": "Realiza una prueba de conexión a la base de datos MariaDB.",
+        "description": "Endpoint de diagnóstico (\"Health Check\") para verificar que la API puede establecer\r\nuna conexión exitosa con la base de datos. Es útil para monitorear el estado del servicio.",
+        "responses": {
+          "200": {
+            "description": "Conexión exitosa. El servicio está operativo.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La conexión se intentó pero falló sin generar una excepción crítica.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor. La conexión falló debido a una excepción (ej. credenciales incorrectas, firewall).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Obtiene el catálogo de productos de FarmaPrisa con soporte para filtros opcionales.",
+        "description": "Este endpoint accede al catálogo completo de la tabla 'productos' en MariaDB.\r\nPermite a los clientes (web y móvil) explorar artículos y aplicar filtros.\r\n\r\n**Filtros disponibles (Opcionales):**\r\n* **categoriaId:** Filtra productos por una categoría o subcategoría específica.\r\n* **proveedorId:** Filtra productos por la marca o laboratorio.\r\n* **sintomaId:** Filtra productos que tratan un síntoma específico (usa la tabla pivote producto_sintomas).",
+        "parameters": [
+          {
+            "name": "categoriaId",
+            "in": "query",
+            "description": "ID de la categoría para filtrar el listado.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "proveedorId",
+            "in": "query",
+            "description": "ID del proveedor o marca para filtrar el listado.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sintomaId",
+            "in": "query",
+            "description": "ID del síntoma para filtrar los productos relacionados.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve un listado de productos con la estructura de ProductoDto.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductoDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductoDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductoDto"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor al procesar la solicitud."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Crea un nuevo producto en el catálogo. Solo accesible para Administradores.",
+        "description": "Este endpoint requiere el rol 'administrador' para su ejecución.\r\nPermite ingresar el producto principal y su colección de detalles (especificaciones, ingredientes).\r\nLos valores de tipoDetalleIdentificador son los identificadores para los detalles (DESCRIPTION, PRODUCT_SPECIFICATIONS, \r\nINGREDIENTS, NUTRITION_FACTS, WARNINGS, SHIPPING_SPECIFICATIONS, FROM_THE_BRAND, PRODUCT_BANNER).",
+        "requestBody": {
+          "description": "Datos del nuevo producto.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado exitosamente. Devuelve el ID del nuevo producto.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. SKu duplicado, falta el Nombre).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos/{id}": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Obtiene todos los detalles de un producto específico (ficha completa).",
+        "description": "Este endpoint carga datos pesados: detalles personalizados, especificaciones, y la lista de opiniones.\r\nEs utilizado por la vista de detalle de la aplicación web y móvil.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "El ID del producto a buscar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "idioma",
+            "in": "query",
+            "description": "Idioma a obtener los detalles",
+            "schema": {
+              "type": "string",
+              "default": "ES"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve un objeto ProductoDetalleDto con todos los datos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoDetalleDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoDetalleDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoDetalleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Si el producto con el ID especificado no se encuentra.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Actualiza la información básica y sincroniza la colección de detalles de un producto existente. Solo Administradores.",
+        "description": "Este endpoint realiza una actualización \"delta\" para las propiedades básicas y una sincronización completa para la lista de detalles.\r\n* **Detalles con ID:** Se actualizan.\r\n* **Detalles sin ID:** Se añaden.\r\n* **Detalles existentes no enviados:** Se eliminan.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto a actualizar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Datos del producto a actualizar.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductoUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Actualización exitosa."
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. SKU duplicado).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos/{id}/toggle-status": {
+      "put": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Alterna (Activa/Desactiva) el estado de un producto para mostrarlo u ocultarlo del catálogo. Solo Administradores.",
+        "description": "Este endpoint invierte el valor actual de 'EstaActivo' (Soft Delete), manteniendo la integridad de la BD.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto a modificar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alternancia de estado exitosa. Devuelve un mensaje de éxito y el nuevo estado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos/proveedores": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Recupera la lista completa de proveedores y laboratorios para usarlos en filtros.",
+        "description": "Este endpoint es de acceso público y es usado por el frontend para poblar el menú de filtros de marca.",
+        "responses": {
+          "200": {
+            "description": "Devuelve un listado de ProveedorDto (Id y Nombre).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos/galeria/{imagenId}": {
+      "delete": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Elimina permanentemente (físicamente) una imagen de la galería de un producto. Solo Administradores.",
+        "description": "Elimina la imagen del disco del servidor (VPS) y su registro de la base de datos para liberar espacio.\r\nRequiere el rol 'administrador'.",
+        "parameters": [
+          {
+            "name": "imagenId",
+            "in": "path",
+            "description": "ID del registro de la imagen en la tabla producto_imagenes.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registro de imagen no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Imagen eliminada exitosamente (No Content)."
+          }
+        }
+      }
+    },
+    "/Productos/{id}/galeria/{imagenId}/principal": {
+      "put": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Establece una imagen específica de la galería como la foto principal del producto, y desactiva las demás. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint asegura que solo una imagen tenga 'EsPrincipal = true' por producto mediante una transacción.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto padre.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "imagenId",
+            "in": "path",
+            "description": "ID del registro de la imagen en la tabla producto_imagenes que será marcada como principal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagen principal asignada exitosamente.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto o Imagen no encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Productos/{id}/opiniones": {
+      "post": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Permite a un cliente autenticado agregar una calificación y comentario (reseña) a un producto.",
+        "description": "Requiere autenticación. La opinión se vincula al ProductoId de la URL y al UsuarioId del token JWT.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto al cual se añade la opinión.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Objeto con la calificación (1-5) y el comentario.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpinionCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpinionCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpinionCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Opinión creada exitosamente.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (falta token).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Devuelve el listado de opiniones (reseñas) para un producto específico. Acceso Público.",
+        "description": "Este endpoint es usado por la vista de detalle para cargar las reseñas de forma separada.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del producto.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de opiniones ordenadas por fecha reciente.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpinionDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado (si el listado está vacío).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ProductosExcel/importar-excel": {
+      "post": {
+        "tags": [
+          "ProductosExcel"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/Promocion": {
+      "post": {
+        "tags": [
+          "Promocion"
+        ],
+        "summary": "Crea una nueva promoción y asigna productos o categorías asociadas. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. La operación es transaccional.\r\nEl 'CodigoCupon' debe ser único.",
+        "requestBody": {
+          "description": "Datos de la promoción (descuento, fechas) y colecciones de IDs (ProductoIds, CategoriaIds).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Promoción creada exitosamente.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. Código de Cupón duplicado o falta de campos obligatorios).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Promocion"
+        ],
+        "summary": "Devuelve el listado completo de todas las promociones activas, inactivas y futuras. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. El listado incluye el conteo de productos y categorías asociadas.",
+        "responses": {
+          "200": {
+            "description": "Listado de PromocionesAdminDto ordenadas por FechaFin.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromocionAdminDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromocionAdminDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromocionAdminDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/Promocion/{id}": {
+      "get": {
+        "tags": [
+          "Promocion"
+        ],
+        "summary": "Devuelve el detalle completo de una promoción, incluyendo los IDs de todos los productos y categorías asociados. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint se usa para precargar el formulario de edición de la promoción.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la promoción a consultar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve el objeto PromocionDetalleDto completo.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromocionDetalleDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromocionDetalleDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromocionDetalleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promoción no encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Promocion"
+        ],
+        "summary": "Actualiza los datos principales de una promoción y sincroniza las listas de productos/categorías asociados. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Se utiliza una transacción para asegurar que la actualización de la promoción y las tablas pivote sean atómicas.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la promoción a actualizar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Datos actualizados de la promoción (sincroniza ProductoIds y CategoriaIds).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Actualización exitosa.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error en la solicitud (ej. Código de Cupón duplicado).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promoción no encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/Promocion/{id}/toggle-status": {
+      "put": {
+        "tags": [
+          "Promocion"
+        ],
+        "summary": "Alterna el estado de activación de una promoción (de activo a inactivo o viceversa). Solo Administradores.",
+        "description": "Este endpoint no requiere cuerpo de solicitud. Simplemente invierte el valor actual de 'EstaActiva'.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la promoción a modificar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cambio de estado exitoso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promoción no encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/Proveedor": {
+      "post": {
+        "tags": [
+          "Proveedor"
+        ],
+        "summary": "Registra un nuevo proveedor/laboratorio en el sistema. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint es necesario para crear nuevos productos.",
+        "requestBody": {
+          "description": "Datos del nuevo proveedor.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proveedor creado exitosamente. Devuelve el ID generado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error en la solicitud (ej. Nombre ya existe).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Proveedor"
+        ],
+        "summary": "Devuelve el listado completo de proveedores (marcas/laboratorios) para el Panel de Administración.",
+        "description": "Requiere el rol 'administrador'. Este endpoint se usa para poblar la tabla de gestión de proveedores.",
+        "responses": {
+          "200": {
+            "description": "Listado de proveedores (Id, Nombre, LogoUrl).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProveedorDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado."
+          }
+        }
+      }
+    },
+    "/admin/Proveedor/{id}": {
+      "put": {
+        "tags": [
+          "Proveedor"
+        ],
+        "summary": "Actualiza la información de un proveedor/laboratorio existente. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Se aplica validación de unicidad en Nombre, Email y Identificación Fiscal.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del proveedor a actualizar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Datos del proveedor a actualizar.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProveedorCreateUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Actualización exitosa. Devuelve un mensaje de éxito.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (ej. Nombre, Email o RUC ya existe en otro registro).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proveedor no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Proveedor"
+        ],
+        "summary": "Obtiene los detalles completos de un proveedor específico por su ID. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint se usa para cargar los datos en el formulario de edición (PUT).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del proveedor a consultar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devuelve el objeto ProveedorAdminDto completo.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProveedorAdminDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProveedorAdminDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProveedorAdminDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proveedor no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/Proveedor/{id}/toggle-status": {
+      "put": {
+        "tags": [
+          "Proveedor"
+        ],
+        "summary": "Alterna (Activa/Desactiva) el estado de un proveedor para mostrarlo u ocultarlo del catálogo. Solo Administradores.",
+        "description": "Requiere el rol 'administrador'. Este endpoint invierte el valor actual de 'EstaActivo' (Soft Delete).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del proveedor a modificar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alternancia de estado exitosa. Devuelve un ApiResultDto con el nuevo estado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proveedor no encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/User/id": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Obtiene los datos de un usuario específico por su ID. (Uso administrativo).",
+        "description": "Endpoint protegido, destinado al panel de administración para ver el detalle de una cuenta de usuario.\r\nLa respuesta utiliza un DTO (UserDto) para no exponer datos sensibles como el hash de la contraseña.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "El ID numérico del usuario que se desea consultar.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa. Devuelve los datos del usuario solicitado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado. Si el usuario no tiene permisos de administrador.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado. Si no existe un usuario con el ID proporcionado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Actualiza los datos de un usuario existente por su ID. (Uso administrativo).",
+        "description": "Endpoint protegido, destinado al panel de administración para modificar la información de un usuario.\r\nCampos que se pueden actualizar: NombreCompleto, Telefono, EstaActivo, PuntosFidelidad, ProveedorId y PaisId.\r\nEl email y la contraseña no se modifican desde este endpoint.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "El ID numérico del usuario que se va a actualizar.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Objeto con los datos actualizados del usuario.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Actualización exitosa. No devuelve contenido."
+          },
+          "400": {
+            "description": "Solicitud incorrecta. Si los datos enviados en el cuerpo no son válidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado. Si el usuario no tiene permisos de administrador.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado. Si no existe un usuario con el ID proporcionado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CategoriaCreateUpdateDto": {
+        "required": [
+          "nombre"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoriaPadreId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CategoriaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoriaPadreId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "subcategorias": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoriaDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DashboardDataDto": {
+        "type": "object",
+        "properties": {
+          "ingresosDiarios": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalUsuariosRegistrados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nuevasOrdenesDiarias": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ventasUltimos6Meses": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "pedidosDiarios": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DetallePedidoItemDto": {
+        "type": "object",
+        "properties": {
+          "productoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreProducto": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagenUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "cantidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precioUnitario": {
+            "type": "number",
+            "format": "double"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileUploadResponseDto": {
+        "type": "object",
+        "properties": {
+          "urlPublica": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportResultDto": {
+        "type": "object",
+        "properties": {
+          "registrosExitosos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalRegistrosProcesados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exito": {
+            "type": "boolean"
+          },
+          "mensajesError": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OpinionCreateDto": {
+        "required": [
+          "calificacion"
+        ],
+        "type": "object",
+        "properties": {
+          "calificacion": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OpinionDto": {
+        "type": "object",
+        "properties": {
+          "calificacion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "type": "string",
+            "nullable": true
+          },
+          "fechaOpinion": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "usuarioNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "productoNombre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaisDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PedidoAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaPedido": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoEntrega": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNombre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PedidoDetalleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaPedido": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoEntrega": {
+            "type": "string",
+            "nullable": true
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "costoEnvio": {
+            "type": "number",
+            "format": "double"
+          },
+          "montoDescuento": {
+            "type": "number",
+            "format": "double"
+          },
+          "montoImpuesto": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "clienteEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "sucursalRecogidaNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccionCompletaEnvio": {
+            "type": "string",
+            "nullable": true
+          },
+          "articulos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetallePedidoItemDto"
+            },
+            "nullable": true
+          },
+          "estadoTransaccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "pasarelaPago": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "ProductoCreateDto": {
+        "required": [
+          "nombre",
+          "precio",
+          "sku"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double"
+          },
+          "precioAnterior": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "sku": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requiereReceta": {
+            "type": "boolean"
+          },
+          "categoriaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "proveedorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean"
+          },
+          "detalles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoDetalleAdminDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoDetalleAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "tipoDetalleIdentificador": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorDetalle": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "idioma": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoDetalleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double"
+          },
+          "precioAnterior": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "sku": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiereReceta": {
+            "type": "boolean"
+          },
+          "estaActivo": {
+            "type": "boolean"
+          },
+          "proveedorNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagenesGaleria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoImagenDto"
+            },
+            "nullable": true
+          },
+          "especificaciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoDetalleItemDto"
+            },
+            "nullable": true
+          },
+          "opiniones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpinionDto"
+            },
+            "nullable": true
+          },
+          "calificacionPromedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "sucursalRecogidaNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccionCompletaEnvio": {
+            "type": "string",
+            "nullable": true
+          },
+          "estadoTransaccion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoDetalleItemDto": {
+        "type": "object",
+        "properties": {
+          "tipoDetalle": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorDetalle": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double"
+          },
+          "imagenesGaleria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoImagenDto"
+            },
+            "nullable": true
+          },
+          "requiereReceta": {
+            "type": "boolean"
+          },
+          "proveedorNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoImagenDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "urlImagen": {
+            "type": "string",
+            "nullable": true
+          },
+          "orden": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "esPrincipal": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoUpdateDto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "precioAnterior": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "sku": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiereReceta": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "categoriaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "proveedorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "detalles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoDetalleAdminDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoVencimientoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreProducto": {
+            "type": "string",
+            "nullable": true
+          },
+          "stockActual": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sku": {
+            "type": "string",
+            "nullable": true
+          },
+          "fechaVencimiento": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "diasParaExpirar": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stockMinimo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "alertaStockBajo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductoVencimientoDtoPagedResultDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoVencimientoDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromocionAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoCupon": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoDescuento": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorDescuento": {
+            "type": "number",
+            "format": "double"
+          },
+          "fechaInicio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaFin": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estaActiva": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "totalProductosAsociados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCategoriasAsociadas": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromocionCreateDto": {
+        "required": [
+          "codigoCupon",
+          "fechaFin",
+          "fechaInicio",
+          "nombre",
+          "tipoDescuento",
+          "valorDescuento"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "codigoCupon": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tipoDescuento": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "valorDescuento": {
+            "maximum": 100000,
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          },
+          "fechaInicio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaFin": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "productoIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "categoriaIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromocionDetalleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoCupon": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoDescuento": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorDescuento": {
+            "type": "number",
+            "format": "double"
+          },
+          "fechaInicio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaFin": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estaActiva": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "productosAsociadosIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            },
+            "description": "Lista de IDs de productos a los que aplica la promoción.",
+            "nullable": true
+          },
+          "categoriasAsociadasIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Lista de IDs de categorías a las que aplica la promoción.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProveedorAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreContacto": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContacto": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefonoContacto": {
+            "type": "string",
+            "nullable": true
+          },
+          "identificacionFiscal": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProveedorCreateUpdateDto": {
+        "required": [
+          "nombre"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreContacto": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContacto": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "telefonoContacto": {
+            "type": "string",
+            "nullable": true
+          },
+          "identificacionFiscal": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProveedorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RolDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreCompleto": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean"
+          },
+          "proveedorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "paisId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "puntosFidelidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaActualizacion": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserLoginDto": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRegisterDto": {
+        "required": [
+          "email",
+          "nombreCompleto",
+          "paisId",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "nombreCompleto": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "minLength": 6,
+            "type": "string"
+          },
+          "paisId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRolesUpdateDto": {
+        "required": [
+          "rolIds"
+        ],
+        "type": "object",
+        "properties": {
+          "rolIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Lista de IDs de los roles que el usuario debe tener. \r\nEsta lista reemplazará por completo los roles actuales del usuario."
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserUpdateDto": {
+        "type": "object",
+        "properties": {
+          "nombreCompleto": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean"
+          },
+          "puntosFidelidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "proveedorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "paisId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO con los campos que se pueden actualizar de un usuario."
+      },
+      "UsuarioAdminCreateDto": {
+        "required": [
+          "email",
+          "nombreCompleto",
+          "paisId",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "nombreCompleto": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "minLength": 6,
+            "type": "string"
+          },
+          "paisId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UsuarioAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreCompleto": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "nullable": true
+          },
+          "estaActivo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "puntosFidelidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fechaActualizacion": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Por favor, introduce 'Bearer' seguido de un espacio y tu token",
+        "scheme": "Bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
